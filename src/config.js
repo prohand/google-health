@@ -20,6 +20,9 @@ export const DEFAULT_CONFIG = {
   // Daily goals: the widget gauges and the "goal reached" scene triggers.
   steps_goal: 10000,
   sleep_goal: 8,
+  // IANA time zone of the user ("Europe/Paris"): where a day starts and ends.
+  // Empty: the time zone of the container (UTC unless TZ is set).
+  timezone: '',
 };
 
 // Bounds of the manifest fields, applied again here: the configuration can
@@ -61,6 +64,7 @@ export function normalizeConfig(raw = {}) {
     poll_frequency: boundedNumber(raw.poll_frequency, 'poll_frequency'),
     steps_goal: Math.round(boundedNumber(raw.steps_goal, 'steps_goal')),
     sleep_goal: boundedNumber(raw.sleep_goal, 'sleep_goal'),
+    timezone: text(raw.timezone),
     access_token: text(raw.access_token),
     refresh_token: text(raw.refresh_token),
     token_expires_at: Number(raw.token_expires_at) || 0,
@@ -68,6 +72,25 @@ export function normalizeConfig(raw = {}) {
     health_user_id: text(raw.health_user_id),
   };
 }
+
+// Keys the user owns: a change of one of them calls for a new read.
+export const USER_KEYS = [
+  'client_id',
+  'client_secret',
+  'poll_frequency',
+  'steps_goal',
+  'sleep_goal',
+  'timezone',
+];
+
+/** The values that forget the linked account. */
+export const NO_TOKENS = {
+  access_token: '',
+  refresh_token: '',
+  token_expires_at: 0,
+  granted_scopes: '',
+  health_user_id: '',
+};
 
 /** Whether the user typed the OAuth client of their Google Cloud project. */
 export function hasClient(config) {

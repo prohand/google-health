@@ -14,6 +14,7 @@ import { OAUTH_SCOPES } from './dataTypes.js';
 
 export const AUTHORIZE_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
 export const TOKEN_URL = 'https://oauth2.googleapis.com/token';
+export const REVOKE_URL = 'https://oauth2.googleapis.com/revoke';
 
 // A consent screen left open longer than this is refused on return.
 const STATE_TTL_MS = 15 * 60 * 1000;
@@ -133,6 +134,26 @@ export function createOAuth({ fetch: fetchImpl = fetch, now = Date.now } = {}) {
     /** Whether the stored access token is still good for a request. */
     isFresh(config) {
       return config.access_token !== '' && config.token_expires_at - EXPIRY_MARGIN_MS > now();
+    },
+
+    /**
+     * Tell Google to forget the grant. Best effort: resolves `false` when
+     * Google could not be told (the tokens are dropped locally anyway).
+     */
+    async revoke(config) {
+      const token = config.refresh_token || config.access_token;
+      if (!token) return false;
+      try {
+        const response = await fetchImpl(REVOKE_URL, {
+          method: 'POST',
+          headers: { 'content-type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({ token }).toString(),
+          signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+        });
+        return response.ok;
+      } catch {
+        return false;
+      }
     },
 
     /** Renew the access token; resolves the tokens to store. */

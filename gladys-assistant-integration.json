@@ -1,177 +1,862 @@
 {
   "manifest_version": 1,
   "type": "device",
-  "name": "Demo Devices Template",
+  "name": "Google Health",
   "description": {
-    "en": "Starter template showing sensors, a switch, a dimmable light and a smart plug.",
-    "fr": "Template de démarrage : capteurs, interrupteur, lampe variable et prise connectée."
+    "en": "Steps, heart rate, sleep and weight from Google Health (Fitbit, Pixel Watch) in Gladys.",
+    "fr": "Pas, fréquence cardiaque, sommeil et poids de Google Health (Fitbit, Pixel Watch) dans Gladys.",
+    "de": "Schritte, Herzfrequenz, Schlaf und Gewicht aus Google Health (Fitbit, Pixel Watch) in Gladys.",
+    "es": "Pasos, frecuencia cardíaca, sueño y peso de Google Health (Fitbit, Pixel Watch) en Gladys."
   },
   "version": "1.0.0",
-  "docker_image": "ghcr.io/gladysassistant/integration-template-js:1.0.0",
-  "gladys_version": ">=5.1.0",
-  "cover_image": "https://raw.githubusercontent.com/GladysAssistant/integration-template-js/master/cover.png",
-  "categories": ["lighting", "security", "environment"],
-  "transports": ["local", "cloud"],
+  "docker_image": "ghcr.io/prohand/google-health:1.0.0",
+  "gladys_version": ">=5.3.0",
+  "cover_image": "https://raw.githubusercontent.com/prohand/google-health/main/cover.jpg",
+  "categories": ["services"],
+  "keywords": [
+    "fitbit",
+    "pixel watch",
+    "google fit",
+    "health",
+    "santé",
+    "sommeil",
+    "sleep",
+    "steps",
+    "heart rate",
+    "weight"
+  ],
+  "transports": ["cloud"],
   "config_schema": [
     {
       "key": "intro",
       "type": "section",
-      "label": { "en": "Getting started", "fr": "Pour commencer" },
+      "label": {
+        "en": "Getting started",
+        "fr": "Pour commencer",
+        "de": "Erste Schritte",
+        "es": "Primeros pasos"
+      },
       "description": {
-        "en": "The demo weather station reads real data from the free Open-Meteo API: pick the coordinates to observe. No account, no API key.",
-        "fr": "La station météo de démonstration lit de vraies données via l'API gratuite Open-Meteo : choisissez les coordonnées à observer. Pas de compte, pas de clé d'API."
+        "en": "Google only gives your health data to an application of your own. In the Google Cloud console: create a project, enable the Google Health API, configure the OAuth consent screen (add yourself as a test user), then create an OAuth client of type \"Web application\". Paste its client ID and secret below, save, then press Connect. The documentation walks you through every step.",
+        "fr": "Google ne donne vos données de santé qu'à une application qui vous appartient. Dans la console Google Cloud : créez un projet, activez l'API Google Health, configurez l'écran de consentement OAuth (ajoutez-vous comme utilisateur test), puis créez un client OAuth de type « Application Web ». Collez son ID client et son secret ci-dessous, enregistrez, puis cliquez sur Connecter. La documentation détaille chaque étape.",
+        "de": "Google gibt Ihre Gesundheitsdaten nur an eine eigene Anwendung weiter. In der Google Cloud Console: Projekt anlegen, Google Health API aktivieren, OAuth-Zustimmungsbildschirm einrichten (sich selbst als Testnutzer eintragen), dann einen OAuth-Client vom Typ „Webanwendung“ erstellen. Client-ID und Clientschlüssel unten einfügen, speichern und auf Verbinden klicken. Die Dokumentation erklärt jeden Schritt.",
+        "es": "Google solo entrega sus datos de salud a una aplicación propia. En la consola de Google Cloud: cree un proyecto, active la API de Google Health, configure la pantalla de consentimiento de OAuth (añádase como usuario de prueba) y cree un cliente OAuth de tipo «Aplicación web». Pegue abajo su ID de cliente y su secreto, guarde y pulse Conectar. La documentación detalla cada paso."
       },
       "links": [
         {
-          "url": "https://open-meteo.com/en/docs",
-          "label": { "en": "Open-Meteo documentation", "fr": "Documentation Open-Meteo" }
+          "url": "https://console.cloud.google.com/apis/library/health.googleapis.com",
+          "label": {
+            "en": "Enable the Google Health API",
+            "fr": "Activer l'API Google Health",
+            "de": "Google Health API aktivieren",
+            "es": "Activar la API de Google Health"
+          }
+        },
+        {
+          "url": "https://console.cloud.google.com/apis/credentials",
+          "label": {
+            "en": "Google Cloud credentials",
+            "fr": "Identifiants Google Cloud",
+            "de": "Google-Cloud-Anmeldedaten",
+            "es": "Credenciales de Google Cloud"
+          }
+        },
+        {
+          "url": "https://developers.google.com/health/setup",
+          "label": {
+            "en": "Google Health API setup guide",
+            "fr": "Guide de mise en route de l'API Google Health",
+            "de": "Einrichtungsanleitung der Google Health API",
+            "es": "Guía de configuración de la API de Google Health"
+          }
         }
       ]
     },
     {
-      "key": "latitude",
-      "type": "number",
-      "label": { "en": "Latitude", "fr": "Latitude" },
-      "description": {
-        "en": "Latitude used for the demo weather sensor.",
-        "fr": "Latitude utilisée par le capteur météo de démonstration."
-      },
-      "placeholder": { "en": "e.g. 48.8566", "fr": "ex. 48.8566" },
+      "key": "client_id",
+      "type": "string",
       "required": true,
-      "default": 48.8566,
-      "min": -90,
-      "max": 90
+      "label": {
+        "en": "OAuth client ID",
+        "fr": "ID client OAuth",
+        "de": "OAuth-Client-ID",
+        "es": "ID de cliente OAuth"
+      },
+      "description": {
+        "en": "Client ID of the \"Web application\" OAuth client of your Google Cloud project.",
+        "fr": "ID client du client OAuth « Application Web » de votre projet Google Cloud.",
+        "de": "Client-ID des OAuth-Clients „Webanwendung“ Ihres Google-Cloud-Projekts.",
+        "es": "ID de cliente del cliente OAuth «Aplicación web» de su proyecto de Google Cloud."
+      },
+      "placeholder": {
+        "en": "e.g. 1234567890-abc.apps.googleusercontent.com",
+        "fr": "ex. 1234567890-abc.apps.googleusercontent.com",
+        "de": "z. B. 1234567890-abc.apps.googleusercontent.com",
+        "es": "p. ej. 1234567890-abc.apps.googleusercontent.com"
+      }
     },
     {
-      "key": "longitude",
-      "type": "number",
-      "label": { "en": "Longitude", "fr": "Longitude" },
-      "description": {
-        "en": "Longitude used for the demo weather sensor.",
-        "fr": "Longitude utilisée par le capteur météo de démonstration."
-      },
-      "placeholder": { "en": "e.g. 2.3522", "fr": "ex. 2.3522" },
+      "key": "client_secret",
+      "type": "secret",
       "required": true,
-      "default": 2.3522,
-      "min": -180,
-      "max": 180
+      "label": {
+        "en": "OAuth client secret",
+        "fr": "Secret client OAuth",
+        "de": "OAuth-Clientschlüssel",
+        "es": "Secreto de cliente OAuth"
+      },
+      "description": {
+        "en": "Client secret of the same OAuth client. It never leaves Gladys.",
+        "fr": "Secret client du même client OAuth. Il ne quitte jamais Gladys.",
+        "de": "Clientschlüssel desselben OAuth-Clients. Er verlässt Gladys nie.",
+        "es": "Secreto de cliente del mismo cliente OAuth. Nunca sale de Gladys."
+      }
     },
     {
-      "key": "unit",
-      "type": "select",
-      "label": { "en": "Temperature unit", "fr": "Unité de température" },
+      "key": "google_account",
+      "type": "oauth2",
+      "label": {
+        "en": "Google account",
+        "fr": "Compte Google",
+        "de": "Google-Konto",
+        "es": "Cuenta de Google"
+      },
+      "description": {
+        "en": "Save the client ID and secret first, then connect the Google account whose health data Gladys should read. Access is read-only.",
+        "fr": "Enregistrez d'abord l'ID client et le secret, puis connectez le compte Google dont Gladys doit lire les données de santé. L'accès est en lecture seule.",
+        "de": "Speichern Sie zuerst Client-ID und Clientschlüssel und verbinden Sie dann das Google-Konto, dessen Gesundheitsdaten Gladys lesen soll. Der Zugriff ist schreibgeschützt.",
+        "es": "Guarde primero el ID de cliente y el secreto y conecte después la cuenta de Google cuyos datos de salud debe leer Gladys. El acceso es de solo lectura."
+      }
+    },
+    {
+      "key": "goals",
+      "type": "section",
+      "label": {
+        "en": "Goals and refresh",
+        "fr": "Objectifs et rafraîchissement",
+        "de": "Ziele und Aktualisierung",
+        "es": "Objetivos y actualización"
+      },
+      "description": {
+        "en": "The goals drive the widget gauges and the scene triggers.",
+        "fr": "Les objectifs pilotent les jauges des widgets et les déclencheurs de scène.",
+        "de": "Die Ziele steuern die Anzeigen der Widgets und die Szenenauslöser.",
+        "es": "Los objetivos controlan los indicadores de los widgets y los disparadores de escena."
+      }
+    },
+    {
+      "key": "steps_goal",
+      "type": "number",
       "required": false,
-      "default": "celsius",
-      "options": [
-        { "value": "celsius", "label": { "en": "Celsius", "fr": "Celsius" } },
-        { "value": "fahrenheit", "label": { "en": "Fahrenheit", "fr": "Fahrenheit" } }
-      ]
+      "default": 10000,
+      "min": 100,
+      "max": 100000,
+      "label": {
+        "en": "Daily step goal",
+        "fr": "Objectif de pas quotidien",
+        "de": "Tägliches Schrittziel",
+        "es": "Objetivo diario de pasos"
+      },
+      "description": {
+        "en": "Number of steps to reach each day.",
+        "fr": "Nombre de pas à atteindre chaque jour.",
+        "de": "Anzahl der Schritte, die jeden Tag erreicht werden sollen.",
+        "es": "Número de pasos que alcanzar cada día."
+      }
+    },
+    {
+      "key": "sleep_goal",
+      "type": "number",
+      "required": false,
+      "default": 8,
+      "min": 1,
+      "max": 16,
+      "label": {
+        "en": "Sleep goal (hours)",
+        "fr": "Objectif de sommeil (heures)",
+        "de": "Schlafziel (Stunden)",
+        "es": "Objetivo de sueño (horas)"
+      },
+      "description": {
+        "en": "Hours of sleep to reach each night.",
+        "fr": "Heures de sommeil à atteindre chaque nuit.",
+        "de": "Stunden Schlaf, die jede Nacht erreicht werden sollen.",
+        "es": "Horas de sueño que alcanzar cada noche."
+      }
     },
     {
       "key": "poll_frequency",
       "type": "number",
-      "label": { "en": "Refresh interval (s)", "fr": "Intervalle de rafraîchissement (s)" },
-      "description": {
-        "en": "How often sensors are polled, in seconds (one minute minimum).",
-        "fr": "Fréquence d'interrogation des capteurs, en secondes (une minute minimum)."
-      },
       "required": false,
-      "default": 300,
-      "min": 60,
-      "max": 3600
+      "default": 900,
+      "min": 300,
+      "max": 21600,
+      "label": {
+        "en": "Refresh interval (s)",
+        "fr": "Intervalle de rafraîchissement (s)",
+        "de": "Aktualisierungsintervall (s)",
+        "es": "Intervalo de actualización (s)"
+      },
+      "description": {
+        "en": "How often Google Health is read, in seconds (5 minutes minimum). Your watch itself only syncs from time to time.",
+        "fr": "Fréquence de lecture de Google Health, en secondes (5 minutes minimum). Votre montre elle-même ne se synchronise que de temps en temps.",
+        "de": "Wie oft Google Health abgerufen wird, in Sekunden (mindestens 5 Minuten). Ihre Uhr selbst synchronisiert nur von Zeit zu Zeit.",
+        "es": "Frecuencia de lectura de Google Health, en segundos (5 minutos como mínimo). Su reloj solo se sincroniza de vez en cuando."
+      }
+    },
+    {
+      "key": "timezone",
+      "type": "string",
+      "required": false,
+      "label": {
+        "en": "Time zone",
+        "fr": "Fuseau horaire",
+        "de": "Zeitzone",
+        "es": "Zona horaria"
+      },
+      "description": {
+        "en": "Your IANA time zone: it decides when \"today\" starts. Empty: UTC.",
+        "fr": "Votre fuseau horaire IANA : il décide quand commence « aujourd'hui ». Vide : UTC.",
+        "de": "Ihre IANA-Zeitzone: Sie bestimmt, wann „heute“ beginnt. Leer: UTC.",
+        "es": "Su zona horaria IANA: decide cuándo empieza «hoy». Vacío: UTC."
+      },
+      "placeholder": {
+        "en": "e.g. Europe/Paris",
+        "fr": "ex. Europe/Paris",
+        "de": "z. B. Europe/Berlin",
+        "es": "p. ej. Europe/Madrid"
+      }
     }
   ],
   "actions": [
     {
-      "key": "test_weather",
-      "label": { "en": "Test the weather provider", "fr": "Tester le fournisseur météo" },
-      "timeout_seconds": 30
+      "key": "test_connection",
+      "label": {
+        "en": "Test the connection",
+        "fr": "Tester la connexion",
+        "de": "Verbindung testen",
+        "es": "Probar la conexión"
+      },
+      "timeout_seconds": 60
     },
     {
-      "key": "identify",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "fields": [
-        {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
-        }
-      ]
+      "key": "disconnect",
+      "label": {
+        "en": "Disconnect the Google account",
+        "fr": "Déconnecter le compte Google",
+        "de": "Google-Konto trennen",
+        "es": "Desconectar la cuenta de Google"
+      },
+      "timeout_seconds": 30
     }
   ],
   "scene_triggers": [
     {
-      "key": "motion_detected",
-      "label": { "en": "Motion detected", "fr": "Mouvement détecté" },
+      "key": "steps_goal_reached",
+      "label": {
+        "en": "Daily step goal reached",
+        "fr": "Objectif de pas quotidien atteint",
+        "de": "Tägliches Schrittziel erreicht",
+        "es": "Objetivo diario de pasos alcanzado"
+      },
       "description": {
-        "en": "A demo motion sensor saw a person or an animal move.",
-        "fr": "Un détecteur de démonstration a vu bouger une personne ou un animal."
+        "en": "The steps of the day reached the goal of the configuration. Fires once a day.",
+        "fr": "Les pas du jour ont atteint l'objectif de la configuration. Se déclenche une fois par jour.",
+        "de": "Die Schritte des Tages haben das Ziel der Konfiguration erreicht. Löst einmal pro Tag aus.",
+        "es": "Los pasos del día han alcanzado el objetivo de la configuración. Se dispara una vez al día."
+      },
+      "variables": [
+        {
+          "key": "steps",
+          "type": "number",
+          "label": {
+            "en": "Steps",
+            "fr": "Pas",
+            "de": "Schritte",
+            "es": "Pasos"
+          }
+        },
+        {
+          "key": "goal",
+          "type": "number",
+          "label": {
+            "en": "Goal",
+            "fr": "Objectif",
+            "de": "Ziel",
+            "es": "Objetivo"
+          }
+        }
+      ]
+    },
+    {
+      "key": "sleep_recorded",
+      "label": {
+        "en": "A night of sleep is recorded",
+        "fr": "Une nuit de sommeil est enregistrée",
+        "de": "Eine Schlafnacht wurde aufgezeichnet",
+        "es": "Se registra una noche de sueño"
+      },
+      "description": {
+        "en": "Google Health received a new sleep: usually shortly after you wake up, once the watch has synced.",
+        "fr": "Google Health a reçu un nouveau sommeil : en général peu après le réveil, une fois la montre synchronisée.",
+        "de": "Google Health hat einen neuen Schlaf erhalten: meist kurz nach dem Aufwachen, sobald die Uhr synchronisiert hat.",
+        "es": "Google Health ha recibido un nuevo sueño: normalmente poco después de despertar, cuando el reloj se ha sincronizado."
       },
       "fields": [
         {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Sensor", "fr": "Détecteur" }
-        },
-        {
-          "key": "target",
+          "key": "quality",
           "type": "multi_select",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" },
+          "label": {
+            "en": "Sleep goal",
+            "fr": "Objectif de sommeil",
+            "de": "Schlafziel",
+            "es": "Objetivo de sueño"
+          },
           "options": [
-            { "value": "person", "label": { "en": "Person", "fr": "Personne" } },
-            { "value": "animal", "label": { "en": "Animal", "fr": "Animal" } }
+            {
+              "value": "goal_reached",
+              "label": {
+                "en": "Goal reached",
+                "fr": "Objectif atteint",
+                "de": "Ziel erreicht",
+                "es": "Objetivo alcanzado"
+              }
+            },
+            {
+              "value": "goal_missed",
+              "label": {
+                "en": "Goal missed",
+                "fr": "Objectif manqué",
+                "de": "Ziel verfehlt",
+                "es": "Objetivo no alcanzado"
+              }
+            }
           ]
         }
       ],
       "variables": [
         {
-          "key": "target",
+          "key": "quality",
           "type": "string",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" }
+          "label": {
+            "en": "Sleep goal (goal_reached / goal_missed)",
+            "fr": "Objectif de sommeil (goal_reached / goal_missed)",
+            "de": "Schlafziel (goal_reached / goal_missed)",
+            "es": "Objetivo de sueño (goal_reached / goal_missed)"
+          }
+        },
+        {
+          "key": "duration_minutes",
+          "type": "number",
+          "label": {
+            "en": "Time asleep (minutes)",
+            "fr": "Temps de sommeil (minutes)",
+            "de": "Schlafzeit (Minuten)",
+            "es": "Tiempo dormido (minutos)"
+          }
+        },
+        {
+          "key": "duration_hours",
+          "type": "number",
+          "label": {
+            "en": "Time asleep (hours)",
+            "fr": "Temps de sommeil (heures)",
+            "de": "Schlafzeit (Stunden)",
+            "es": "Tiempo dormido (horas)"
+          }
+        },
+        {
+          "key": "deep_minutes",
+          "type": "number",
+          "label": {
+            "en": "Deep sleep (minutes)",
+            "fr": "Sommeil profond (minutes)",
+            "de": "Tiefschlaf (Minuten)",
+            "es": "Sueño profundo (minutos)"
+          }
+        },
+        {
+          "key": "rem_minutes",
+          "type": "number",
+          "label": {
+            "en": "REM sleep (minutes)",
+            "fr": "Sommeil paradoxal (minutes)",
+            "de": "REM-Schlaf (Minuten)",
+            "es": "Sueño REM (minutos)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "weight_recorded",
+      "label": {
+        "en": "A weigh-in is recorded",
+        "fr": "Une pesée est enregistrée",
+        "de": "Eine Gewichtsmessung wurde aufgezeichnet",
+        "es": "Se registra un pesaje"
+      },
+      "description": {
+        "en": "Google Health received a new weight, from a connected scale or typed in the app.",
+        "fr": "Google Health a reçu un nouveau poids, depuis une balance connectée ou saisi dans l'application.",
+        "de": "Google Health hat ein neues Gewicht erhalten, von einer vernetzten Waage oder in der App eingegeben.",
+        "es": "Google Health ha recibido un nuevo peso, de una báscula conectada o introducido en la aplicación."
+      },
+      "fields": [
+        {
+          "key": "trend",
+          "type": "multi_select",
+          "label": {
+            "en": "Compared with the previous weigh-in",
+            "fr": "Par rapport à la pesée précédente",
+            "de": "Im Vergleich zur vorherigen Messung",
+            "es": "Respecto al pesaje anterior"
+          },
+          "options": [
+            {
+              "value": "up",
+              "label": {
+                "en": "Higher",
+                "fr": "En hausse",
+                "de": "Höher",
+                "es": "Más alto"
+              }
+            },
+            {
+              "value": "down",
+              "label": {
+                "en": "Lower",
+                "fr": "En baisse",
+                "de": "Niedriger",
+                "es": "Más bajo"
+              }
+            },
+            {
+              "value": "stable",
+              "label": {
+                "en": "Stable",
+                "fr": "Stable",
+                "de": "Stabil",
+                "es": "Estable"
+              }
+            }
+          ]
+        }
+      ],
+      "variables": [
+        {
+          "key": "trend",
+          "type": "string",
+          "label": {
+            "en": "Trend (up / down / stable)",
+            "fr": "Tendance (up / down / stable)",
+            "de": "Trend (up / down / stable)",
+            "es": "Tendencia (up / down / stable)"
+          }
+        },
+        {
+          "key": "weight_kg",
+          "type": "number",
+          "label": {
+            "en": "Weight (kg)",
+            "fr": "Poids (kg)",
+            "de": "Gewicht (kg)",
+            "es": "Peso (kg)"
+          }
+        },
+        {
+          "key": "change_kg",
+          "type": "number",
+          "label": {
+            "en": "Change since the previous weigh-in (kg)",
+            "fr": "Écart avec la pesée précédente (kg)",
+            "de": "Änderung seit der vorherigen Messung (kg)",
+            "es": "Cambio desde el pesaje anterior (kg)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "workout_recorded",
+      "label": {
+        "en": "A workout is recorded",
+        "fr": "Une séance de sport est enregistrée",
+        "de": "Ein Training wurde aufgezeichnet",
+        "es": "Se registra un entrenamiento"
+      },
+      "description": {
+        "en": "Google Health received a new exercise (run, walk, bike ride...).",
+        "fr": "Google Health a reçu un nouvel exercice (course, marche, vélo...).",
+        "de": "Google Health hat eine neue Aktivität erhalten (Lauf, Spaziergang, Radtour...).",
+        "es": "Google Health ha recibido un nuevo ejercicio (carrera, paseo, bicicleta...)."
+      },
+      "variables": [
+        {
+          "key": "name",
+          "type": "string",
+          "label": {
+            "en": "Workout name",
+            "fr": "Nom de la séance",
+            "de": "Name des Trainings",
+            "es": "Nombre del entrenamiento"
+          }
+        },
+        {
+          "key": "exercise_type",
+          "type": "string",
+          "label": {
+            "en": "Exercise type",
+            "fr": "Type d'exercice",
+            "de": "Aktivitätstyp",
+            "es": "Tipo de ejercicio"
+          }
+        },
+        {
+          "key": "duration_minutes",
+          "type": "number",
+          "label": {
+            "en": "Duration (minutes)",
+            "fr": "Durée (minutes)",
+            "de": "Dauer (Minuten)",
+            "es": "Duración (minutos)"
+          }
+        },
+        {
+          "key": "calories",
+          "type": "number",
+          "label": {
+            "en": "Calories (kcal)",
+            "fr": "Calories (kcal)",
+            "de": "Kalorien (kcal)",
+            "es": "Calorías (kcal)"
+          }
+        },
+        {
+          "key": "distance_km",
+          "type": "number",
+          "label": {
+            "en": "Distance (km)",
+            "fr": "Distance (km)",
+            "de": "Distanz (km)",
+            "es": "Distancia (km)"
+          }
         }
       ]
     }
   ],
   "scene_actions": [
     {
-      "key": "identify_device",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "description": {
-        "en": "Make a device signal itself (the demo light blinks).",
-        "fr": "Fait se signaler un appareil (la lampe de démonstration clignote)."
+      "key": "sync_now",
+      "label": {
+        "en": "Read Google Health now",
+        "fr": "Lire Google Health maintenant",
+        "de": "Google Health jetzt abrufen",
+        "es": "Leer Google Health ahora"
       },
-      "timeout_seconds": 15,
+      "description": {
+        "en": "Reads the account without waiting for the next refresh, and updates the devices.",
+        "fr": "Lit le compte sans attendre le prochain rafraîchissement, et met à jour les appareils.",
+        "de": "Ruft das Konto ab, ohne auf die nächste Aktualisierung zu warten, und aktualisiert die Geräte.",
+        "es": "Lee la cuenta sin esperar a la próxima actualización y actualiza los dispositivos."
+      },
+      "timeout_seconds": 60,
+      "outputs": [
+        {
+          "key": "steps",
+          "type": "number",
+          "label": {
+            "en": "Steps today",
+            "fr": "Pas du jour",
+            "de": "Schritte heute",
+            "es": "Pasos de hoy"
+          }
+        },
+        {
+          "key": "synced_at",
+          "type": "string",
+          "label": {
+            "en": "Time of the read",
+            "fr": "Heure de la lecture",
+            "de": "Zeitpunkt des Abrufs",
+            "es": "Hora de la lectura"
+          }
+        }
+      ]
+    },
+    {
+      "key": "get_daily_summary",
+      "label": {
+        "en": "Get the health summary of the day",
+        "fr": "Obtenir le résumé santé du jour",
+        "de": "Gesundheitsübersicht des Tages abrufen",
+        "es": "Obtener el resumen de salud del día"
+      },
+      "description": {
+        "en": "Gives the last figures read, and a ready-made sentence to send as a message or to speak.",
+        "fr": "Donne les derniers chiffres lus, et une phrase toute faite à envoyer par message ou à faire dire.",
+        "de": "Liefert die zuletzt gelesenen Werte und einen fertigen Satz zum Versenden oder Vorlesen.",
+        "es": "Da las últimas cifras leídas y una frase lista para enviar por mensaje o decir en voz alta."
+      },
+      "timeout_seconds": 60,
       "fields": [
         {
-          "key": "device",
+          "key": "language",
           "type": "select",
-          "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
+          "required": false,
+          "default": "en",
+          "label": {
+            "en": "Language of the sentence",
+            "fr": "Langue de la phrase",
+            "de": "Sprache des Satzes",
+            "es": "Idioma de la frase"
+          },
+          "options": [
+            {
+              "value": "en",
+              "label": {
+                "en": "English",
+                "fr": "Anglais",
+                "de": "Englisch",
+                "es": "Inglés"
+              }
+            },
+            {
+              "value": "fr",
+              "label": {
+                "en": "French",
+                "fr": "Français",
+                "de": "Französisch",
+                "es": "Francés"
+              }
+            },
+            {
+              "value": "de",
+              "label": {
+                "en": "German",
+                "fr": "Allemand",
+                "de": "Deutsch",
+                "es": "Alemán"
+              }
+            },
+            {
+              "value": "es",
+              "label": {
+                "en": "Spanish",
+                "fr": "Espagnol",
+                "de": "Spanisch",
+                "es": "Español"
+              }
+            }
+          ]
         }
       ],
       "outputs": [
         {
-          "key": "signalled",
+          "key": "summary",
+          "type": "string",
+          "label": {
+            "en": "Summary sentence",
+            "fr": "Phrase de résumé",
+            "de": "Zusammenfassung",
+            "es": "Frase de resumen"
+          }
+        },
+        {
+          "key": "steps",
+          "type": "number",
+          "label": {
+            "en": "Steps today",
+            "fr": "Pas du jour",
+            "de": "Schritte heute",
+            "es": "Pasos de hoy"
+          }
+        },
+        {
+          "key": "steps_goal_reached",
           "type": "boolean",
-          "label": { "en": "Device signalled", "fr": "Appareil signalé" }
+          "label": {
+            "en": "Step goal reached",
+            "fr": "Objectif de pas atteint",
+            "de": "Schrittziel erreicht",
+            "es": "Objetivo de pasos alcanzado"
+          }
+        },
+        {
+          "key": "distance_km",
+          "type": "number",
+          "label": {
+            "en": "Distance today (km)",
+            "fr": "Distance du jour (km)",
+            "de": "Distanz heute (km)",
+            "es": "Distancia de hoy (km)"
+          }
+        },
+        {
+          "key": "active_calories",
+          "type": "number",
+          "label": {
+            "en": "Active calories today (kcal)",
+            "fr": "Calories actives du jour (kcal)",
+            "de": "Aktive Kalorien heute (kcal)",
+            "es": "Calorías activas de hoy (kcal)"
+          }
+        },
+        {
+          "key": "total_calories",
+          "type": "number",
+          "label": {
+            "en": "Total calories today (kcal)",
+            "fr": "Calories totales du jour (kcal)",
+            "de": "Gesamtkalorien heute (kcal)",
+            "es": "Calorías totales de hoy (kcal)"
+          }
+        },
+        {
+          "key": "heart_rate",
+          "type": "number",
+          "label": {
+            "en": "Heart rate (bpm)",
+            "fr": "Fréquence cardiaque (bpm)",
+            "de": "Herzfrequenz (bpm)",
+            "es": "Frecuencia cardíaca (lpm)"
+          }
+        },
+        {
+          "key": "resting_heart_rate",
+          "type": "number",
+          "label": {
+            "en": "Resting heart rate (bpm)",
+            "fr": "Fréquence cardiaque au repos (bpm)",
+            "de": "Ruhepuls (bpm)",
+            "es": "Frecuencia cardíaca en reposo (lpm)"
+          }
+        },
+        {
+          "key": "sleep_minutes",
+          "type": "number",
+          "label": {
+            "en": "Last sleep (minutes)",
+            "fr": "Dernier sommeil (minutes)",
+            "de": "Letzter Schlaf (Minuten)",
+            "es": "Último sueño (minutos)"
+          }
+        },
+        {
+          "key": "weight_kg",
+          "type": "number",
+          "label": {
+            "en": "Weight (kg)",
+            "fr": "Poids (kg)",
+            "de": "Gewicht (kg)",
+            "es": "Peso (kg)"
+          }
         }
       ]
     }
   ],
   "widgets": [
     {
-      "key": "demo_status",
-      "label": { "en": "Demo status", "fr": "État de la démo" },
-      "description": {
-        "en": "Live temperature and plug power, plug connection and observed location.",
-        "fr": "Température et puissance en direct, connexion de la prise, position observée."
+      "key": "daily_summary",
+      "label": {
+        "en": "Health of the day",
+        "fr": "Santé du jour",
+        "de": "Gesundheit des Tages",
+        "es": "Salud del día"
       },
-      "icon": "activity",
-      "action_timeout_seconds": 15
+      "description": {
+        "en": "Steps against your goal, heart rate, sleep, calories, distance and weight.",
+        "fr": "Pas par rapport à l'objectif, fréquence cardiaque, sommeil, calories, distance et poids.",
+        "de": "Schritte im Vergleich zum Ziel, Herzfrequenz, Schlaf, Kalorien, Distanz und Gewicht.",
+        "es": "Pasos frente al objetivo, frecuencia cardíaca, sueño, calorías, distancia y peso."
+      },
+      "icon": "heart",
+      "action_timeout_seconds": 60
+    },
+    {
+      "key": "weekly_trend",
+      "label": {
+        "en": "Health over 7 days",
+        "fr": "Santé sur 7 jours",
+        "de": "Gesundheit über 7 Tage",
+        "es": "Salud en 7 días"
+      },
+      "description": {
+        "en": "The last seven days of one metric as a bar chart, with the average and the best day.",
+        "fr": "Les sept derniers jours d'une mesure en barres, avec la moyenne et le meilleur jour.",
+        "de": "Die letzten sieben Tage eines Messwerts als Balkendiagramm, mit Durchschnitt und bestem Tag.",
+        "es": "Los últimos siete días de una métrica en barras, con la media y el mejor día."
+      },
+      "icon": "bar-chart-2",
+      "action_timeout_seconds": 60,
+      "settings": [
+        {
+          "key": "metric",
+          "type": "select",
+          "required": false,
+          "default": "steps",
+          "label": {
+            "en": "Metric",
+            "fr": "Mesure",
+            "de": "Messwert",
+            "es": "Métrica"
+          },
+          "options": [
+            {
+              "value": "steps",
+              "label": {
+                "en": "Steps",
+                "fr": "Pas",
+                "de": "Schritte",
+                "es": "Pasos"
+              }
+            },
+            {
+              "value": "distance",
+              "label": {
+                "en": "Distance",
+                "fr": "Distance",
+                "de": "Distanz",
+                "es": "Distancia"
+              }
+            },
+            {
+              "value": "active_calories",
+              "label": {
+                "en": "Active calories",
+                "fr": "Calories actives",
+                "de": "Aktive Kalorien",
+                "es": "Calorías activas"
+              }
+            },
+            {
+              "value": "total_calories",
+              "label": {
+                "en": "Total calories",
+                "fr": "Calories totales",
+                "de": "Gesamtkalorien",
+                "es": "Calorías totales"
+              }
+            },
+            {
+              "value": "floors",
+              "label": {
+                "en": "Floors",
+                "fr": "Étages",
+                "de": "Etagen",
+                "es": "Pisos"
+              }
+            },
+            {
+              "value": "active_zone_minutes",
+              "label": {
+                "en": "Active zone minutes",
+                "fr": "Minutes en zone active",
+                "de": "Aktivzonenminuten",
+                "es": "Minutos en zona activa"
+              }
+            }
+          ]
+        }
+      ]
     }
   ]
 }
