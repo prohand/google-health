@@ -1,6 +1,6 @@
 {
   "name": "gladys-google-health",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Gladys Assistant external integration for Google Health (Fitbit, Pixel Watch): steps, heart rate, sleep, weight.",
   "type": "module",

@@ -10,6 +10,8 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-11-12
+
 ### Added
 
 - First version of the Google Health integration, started from the official
@@ -38,4 +40,5 @@ the notes of the version's GitHub Release.
 - `SECURITY.md`, `CLAUDE.md`, and the CI, Release, build and GitHub Release
   workflows.
 
-[Unreleased]: https://github.com/prohand/google-health/commits/main
+[Unreleased]: https://github.com/prohand/google-health/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/prohand/google-health/releases/tag/v1.0.1
